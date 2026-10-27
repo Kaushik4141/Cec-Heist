@@ -4,8 +4,7 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2026-10-11",
 	"vars": {
-		"FRONTEND_ORIGIN": "https://cec-heist.cosc25.in",
-		"JWT_SECRET": "cec-heist-super-secret-jwt-key-production-2026-cosc"
+		"FRONTEND_ORIGIN": "https://cec-heist.cosc25.in"
 	},
 	"d1_databases": [
 		{
