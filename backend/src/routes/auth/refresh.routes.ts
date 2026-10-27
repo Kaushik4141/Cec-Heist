@@ -5,6 +5,7 @@ import { createDb } from '../../db'
 import { users } from '../../db/schema/users'
 import { teams } from '../../db/schema/teams'
 import type { CloudflareBindings } from '../../types'
+import { getJwtSecret } from '../../utils/jwt'
 
 const refreshRoutes = new Hono<{ Bindings: CloudflareBindings }>()
 
@@ -22,17 +23,12 @@ refreshRoutes.post('/', async (c) => {
     )
   }
 
-  if (!c.env.JWT_SECRET || c.env.JWT_SECRET.length < 32) {
-    return c.json(
-      { success: false, message: 'Authentication is not configured' },
-      500
-    )
-  }
+  const jwtSecret = getJwtSecret(c.env.JWT_SECRET)
 
   try {
     const payload = await verify(
       body.refreshToken,
-      c.env.JWT_SECRET,
+      jwtSecret,
       'HS256'
     )
 
@@ -70,7 +66,7 @@ refreshRoutes.post('/', async (c) => {
           iat: now,
           exp: now + 60 * 60,
         },
-        c.env.JWT_SECRET,
+        jwtSecret,
         'HS256'
       )
 
@@ -104,7 +100,7 @@ refreshRoutes.post('/', async (c) => {
           iat: now,
           exp: now + 60 * 60,
         },
-        c.env.JWT_SECRET,
+        jwtSecret,
         'HS256'
       )
 

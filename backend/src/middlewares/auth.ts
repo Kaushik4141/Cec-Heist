@@ -1,6 +1,7 @@
 import { verify } from 'hono/jwt'
 import type { MiddlewareHandler } from 'hono'
 import type { AppContext, AuthUser, CloudflareBindings } from '../types'
+import { getJwtSecret } from '../utils/jwt'
 
 export type AuthEnv = {
   Bindings: CloudflareBindings
@@ -21,17 +22,18 @@ export const authMiddleware: MiddlewareHandler<AuthEnv> = async (c, next) => {
 
   const token = authorization.slice('Bearer '.length).trim()
 
-  if (!token || !c.env.JWT_SECRET || c.env.JWT_SECRET.length < 32) {
+  if (!token) {
     return c.json(
       { success: false, message: 'Invalid or expired token' },
       401,
     )
   }
 
+  const jwtSecret = getJwtSecret(c.env.JWT_SECRET)
   let payload
 
   try {
-    payload = await verify(token, c.env.JWT_SECRET, 'HS256')
+    payload = await verify(token, jwtSecret, 'HS256')
   } catch {
     return c.json(
       { success: false, message: 'Invalid or expired token' },
